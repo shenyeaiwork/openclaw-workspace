@@ -233,3 +233,22 @@ type ToolPermissionContext = {
 - /root/lianghua/apps/server/src/modules/trading.ts (引用更新)
 - /root/lianghua/apps/server/src/services/realtimeMarket.ts (引用更新)
 - /root/lianghua/apps/server/src/services/scheduler.ts (添加init)
+
+### LongBridge 修复 (2026-04-19 第二次)
+**根本原因**: API base URL错误 + SDK token问题
+1. CLI 用 `openapi.longbridge.cn` (CN域名)，Python SDK 默认用 `openapi.longbridgeapp.com`
+2. SDK (compiled .so) 使用 native gRPC 而非 REST，与 REST API 不兼容
+3. lb_simple.py 没有提取 volume/turnover，且不支持K线
+
+**修复**:
+- 重写 lb_simple.py：直接用 CLI (自带token自动刷新) 替代 Python SDK
+  - quote 命令：返回 OHLCV + volume + turnover
+  - kline 命令：返回30天K线(完整OHLCV)
+- marketDataProvider.ts：K线改为优先 LongBridge CLI，备用 NASDAQ
+- 环境变量不再传给 CLI（CLI有自己的token管理）
+- 解密密码修复：每个secret用自己key名做密码
+
+**当前数据源**:
+- 行情报价: LongBridge CLI ✅ (price + volume + turnover)
+- K线数据: LongBridge CLI ✅ (30天OHLCV)
+- 备用源: NASDAQ API
