@@ -252,3 +252,10 @@ type ToolPermissionContext = {
 - 行情报价: LongBridge CLI ✅ (price + volume + turnover)
 - K线数据: LongBridge CLI ✅ (30天OHLCV)
 - 备用源: NASDAQ API
+
+### LongBridge 关键教训
+- CLI vs SDK: CLI用gRPC+Device Auth，SDK用REST+OAuth，两套token不兼容
+- SDK默认URL是.openapi.longbridgeapp.com（REST），但实际API在.openapi.longbridge.cn
+- Token文件: `~/.longbridge/openapi/tokens/<client_id>`
+- 正确做法: 用CLI作为数据源（lb_simple.py），不要用Python SDK
+- 文档: `/root/lianghua/docs/LONGBRIDGE_CONFIG.md`
