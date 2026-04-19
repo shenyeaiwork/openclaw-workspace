@@ -259,3 +259,24 @@ type ToolPermissionContext = {
 - Token文件: `~/.longbridge/openapi/tokens/<client_id>`
 - 正确做法: 用CLI作为数据源（lb_simple.py），不要用Python SDK
 - 文档: `/root/lianghua/docs/LONGBRIDGE_CONFIG.md`
+
+---
+
+## 📦 GitHub 仓库管理 (2026-04-19)
+
+### 仓库列表
+| 项目 | 仓库地址 |
+|------|---------|
+| 梁花 | https://github.com/shenyeaiwork/lianghua |
+| 股疯 | https://github.com/shenyeaiwork/gufeng |
+| 工作区 | https://github.com/shenyeaiwork/openclaw-workspace |
+
+### 管理规范
+- **每次重要更新后 commit + push**
+- commit message 用中文，格式: `feat: / fix: / chore: / docs:`
+- 工作区推送时 TOOLS.md 中有真实 token，GitHub 会触发 secret scanning 告警，属正常
+- **禁止**在工作区 push 中包含任何非占位符的 token
+
+### Token
+- GitHub PAT: `{{GITHUB_TOKEN}}` (存储于 TOOLS.md)
+- Token 只有 `repo` 权限（够用，不够用时用户会提供新的）
