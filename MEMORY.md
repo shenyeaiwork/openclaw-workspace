@@ -186,3 +186,50 @@ type ToolPermissionContext = {
 ---
 
 > 📅 最后更新: 2026-04-04 | 改进: 添加行数限制、整理结构、增强可读性
+
+---
+
+## 🔧 梁花系统修复记录 (2026-04-19)
+
+### 问题诊断
+- **根本原因**: LongBridge API Token 过期 (`401004 token invalid`)
+- **影响**: 行情获取全部失败 → 信号生成为0
+- **次要原因**: Yahoo Finance 被服务器IP封禁(429限流)
+
+### 修复方案
+1. **新增 marketDataProvider.ts** - 多源行情降级架构
+   - 优先级1: LongBridge (token过期，暂时不可用)
+   - **优先级2: NASDAQ API** (主数据源，无需认证，稳定)
+   - 优先级3: Yahoo Finance (备用)
+   - 优先级4: 30秒缓存兜底
+
+2. **更新 yahoo_quote.py** - 改用NASDAQ作为首选源
+   - `get_quote_nasdaq()` - 实时报价
+   - `get_candlesticks_nasdaq()` - 30天历史K线(OHLCV)
+
+3. **更新文件**:
+   - signalGenerator.ts → 使用 marketDataProvider
+   - trading.ts → 使用 marketDataProvider 获取报价
+   - realtimeMarket.ts → 使用 marketDataProvider
+   - scheduler.ts → 添加 initMarketData()
+
+### 当前行情数据
+| 股票 | 价格 | RSI(14) | 状态 |
+|------|------|---------|------|
+| NVDA | $201.68 | 57.9 | 正常 |
+| AAPL | $270.23 | 57.8 | 正常 |
+| MSFT | $422.79 | 89.1 | 超买 |
+| GOOGL | $341.68 | 65.1 | 正常 |
+| AMZN | $250.56 | 56.8 | 正常 |
+
+### 待处理
+- [ ] **LongBridge Token刷新** - 需要用户重新授权
+- [ ] 富途OpenAPI作为替代方案（港股数据更好）
+
+### 修改的文件
+- /root/lianghua/apps/server/scripts/yahoo_quote.py (重构)
+- /root/lianghua/apps/server/src/services/marketDataProvider.ts (新增)
+- /root/lianghua/apps/server/src/services/signalGenerator.ts (引用更新)
+- /root/lianghua/apps/server/src/modules/trading.ts (引用更新)
+- /root/lianghua/apps/server/src/services/realtimeMarket.ts (引用更新)
+- /root/lianghua/apps/server/src/services/scheduler.ts (添加init)
