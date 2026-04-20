@@ -282,6 +282,7 @@ router.put('/:sessionId/attendance/:attendanceId', async (req, res) => {
 
 // 结算 - 包含交易记录
 router.post('/:id/settle', async (req: AuthRequest, res) => {
+  if (req.user!.role !== 'ADMIN') return res.status(403).json({ error: '需要管理员权限' });
   const { id } = req.params;
   const { sharedGuestIds, memberMultipliers } = req.body; 
   
@@ -395,7 +396,8 @@ router.post('/:id/settle', async (req: AuthRequest, res) => {
 });
 
 // 取消结算 - 退回未结算状态并回滚数据
-router.post('/:id/cancel-settle', async (req, res) => {
+router.post('/:id/cancel-settle', async (req: AuthRequest, res) => {
+  if (req.user!.role !== 'ADMIN') return res.status(403).json({ error: '需要管理员权限' });
   const { id } = req.params;
   
   const session = await prisma.session.findUnique({
